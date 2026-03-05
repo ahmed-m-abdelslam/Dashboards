@@ -1,8 +1,11 @@
 import os
-
+from dotenv import load_dotenv # type: ignore
+load_dotenv()
 from groq import Groq # type: ignore
 
+
 groq_api = os.getenv("GROQ_API")
+print(f"Using GROQ API Key: {groq_api}")
 
 client = Groq(api_key=groq_api)
 completion = client.chat.completions.create(

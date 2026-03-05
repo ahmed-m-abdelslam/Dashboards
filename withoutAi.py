@@ -945,4 +945,4 @@ if __name__ == '__main__':
     print(f"  Dashboard running at: {url}")
     print("=" * 50 + "\n")
     Timer(2.0, open_browser, args=[url]).start()
-    app.run(debug=False, port=port, host="0.0.0.0")
+    app.run(debug=False, port=port, host="127.0.0.1")

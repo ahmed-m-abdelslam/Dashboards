@@ -9,6 +9,8 @@ import subprocess
 import platform
 from threading import Timer
 from groq import Groq # type: ignore
+from dotenv import load_dotenv # type: ignore
+load_dotenv()
 
 groq_api = os.getenv("GROQ_API")
 groq_client = Groq(api_key=groq_api)
