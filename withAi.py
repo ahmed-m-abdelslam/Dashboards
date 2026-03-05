@@ -1,7 +1,7 @@
 import os
 import pandas as pd # type: ignore
 import dash # type: ignore
-from dash import dcc, html, Input, Output, State, dash_table # type: ignore
+from dash import dcc, html, Input, Output, State, dash_table, clientside_callback # type: ignore
 import plotly.graph_objects as go # type: ignore
 import io
 import base64
@@ -229,7 +229,6 @@ PROJECT_COLORS = [
     {"main": "#14b8a6", "light": "#f0fdfa", "gradient": "linear-gradient(135deg, #14b8a6, #2dd4bf)"},
 ]
 
-# Font sizes
 F = {
     "xs": "11px",
     "sm": "13px",
@@ -255,7 +254,6 @@ def fmt_num(val, currency=""):
 
 def generate_ai_summary(project):
     try:
-
         data_text = f"""
         Project Name: {project.get("project_name")}
         Stage: {project.get("current_stage")}
@@ -269,7 +267,7 @@ def generate_ai_summary(project):
         """
 
         completion = groq_client.chat.completions.create(
-            model="openai/gpt-oss-safeguard-20b",
+            model="llama-3.3-70b-versatile",
             messages=[
                 {
                     "role": "user",
@@ -282,7 +280,6 @@ def generate_ai_summary(project):
                 }
             ],
             temperature=0.3,
-            
         )
 
         return completion.choices[0].message.content.strip()
@@ -297,10 +294,6 @@ def status_color(pct):
         return THEME["warning"]
     return THEME["danger"]
 
-
-# ============================================================
-# Glass card style helper
-# ============================================================
 
 def glass_style(extra=None):
     base = {
@@ -388,7 +381,6 @@ def make_unified_comparison(all_data):
     names = [d.get("project_name", "?") for d in all_data]
     colors = [PROJECT_COLORS[i % len(PROJECT_COLORS)]["main"] for i in range(len(all_data))]
 
-    # === Chart 1: Budget Comparison ===
     budget_fig = go.Figure()
     for i, d in enumerate(all_data):
         cur = d.get("currency", "")
@@ -415,7 +407,6 @@ def make_unified_comparison(all_data):
         xaxis=dict(tickfont={"size": 12, "color": THEME["text_light"]}),
     )
 
-    # === Chart 2: Completion Radar ===
     categories = ["Budget Util", "Packages", "Deliveries", "Overall"]
     radar_fig = go.Figure()
     for i, d in enumerate(all_data):
@@ -445,7 +436,6 @@ def make_unified_comparison(all_data):
         font={"family": "Inter"}
     )
 
-    # === Chart 3: Packages & Deliveries ===
     pkg_del_fig = go.Figure()
 
     x_labels = []
@@ -587,21 +577,15 @@ def make_data_table(all_data):
 # ============================================================
 
 def make_project_card(data, pc_idx):
-
-
     pc = PROJECT_COLORS[pc_idx % len(PROJECT_COLORS)]
 
     name = data.get("project_name", "Unknown")
     stage = data.get("current_stage", "N/A")
-    opening = data.get("opening_date", "TBD")
     currency = data.get("currency", "USD")
 
     proposed = data.get("proposed_budget", 0)
     client_b = data.get("client_budget", 0)
     budget = client_b if client_b > 0 else proposed
-
-    placed = data.get("orders_placed", 0)
-    progress = data.get("orders_in_progress", 0)
 
     savings = data.get("savings_overrun", 0)
 
@@ -615,7 +599,6 @@ def make_project_card(data, pc_idx):
 
     concerns = data.get("concerns", [])
 
-    # AI summary
     ai_summary = generate_ai_summary(data)
 
     stage_lower = stage.lower()
@@ -631,7 +614,6 @@ def make_project_card(data, pc_idx):
 
     oc = status_color(overall)
 
-    # === Gauge ===
     gauge = go.Figure(go.Indicator(
         mode="gauge+number",
         value=round(overall, 1),
@@ -649,7 +631,6 @@ def make_project_card(data, pc_idx):
         paper_bgcolor="rgba(0,0,0,0)"
     )
 
-    # === KPI row ===
     def kpi_chip(label, value, icon, color):
         return html.Div([
             html.Span(icon, style={"fontSize": "20px"}),
@@ -691,7 +672,6 @@ def make_project_card(data, pc_idx):
         "marginBottom": "16px"
     })
 
-    # === Concerns ===
     if concerns:
         cblock = html.Div([
             html.Div(c, style={
@@ -715,7 +695,6 @@ def make_project_card(data, pc_idx):
             "borderLeft": f"3px solid {THEME['success']}"
         })
 
-    # === AI Summary Block ===
     ai_block = html.Div([
         html.P("AI PROJECT SUMMARY", style={
             "fontSize": F["xs"],
@@ -736,8 +715,6 @@ def make_project_card(data, pc_idx):
     ])
 
     return html.Div([
-
-        # Header
         html.Div([
             html.H3(name, style={
                 "margin": "0",
@@ -761,16 +738,12 @@ def make_project_card(data, pc_idx):
             "borderRadius": "18px 18px 0 0"
         }),
 
-        # Body
         html.Div([
-
             kpi_row,
-
             dcc.Graph(
                 figure=gauge,
                 config={"displayModeBar": False}
             ),
-
             html.Div([
                 html.P("CONCERNS & NOTES", style={
                     "fontSize": F["xs"],
@@ -782,12 +755,10 @@ def make_project_card(data, pc_idx):
                 cblock,
                 ai_block
             ])
-
         ], style={
             "padding": "20px 24px",
             "backgroundColor": hex_to_rgba(pc["main"], 0.04)
         })
-
     ], style=glass_style({
         "overflow": "hidden",
         "flex": "1",
@@ -796,16 +767,49 @@ def make_project_card(data, pc_idx):
     }))
 
 
-
-
 # ============================================================
 # DASH APP
 # ============================================================
 
 app = dash.Dash(
     __name__,
-    meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1.0"}]
+    meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1.0"}],
+    suppress_callback_exceptions=True
 )
+
+# ============================================================
+# Fullscreen Button Styles
+# ============================================================
+
+FULLSCREEN_BTN_STYLE = {
+    "backgroundColor": "rgba(99, 102, 241, 0.15)",
+    "color": "#a5b4fc",
+    "border": "1px solid rgba(99, 102, 241, 0.3)",
+    "padding": "10px 20px",
+    "borderRadius": "10px",
+    "cursor": "pointer",
+    "fontSize": F["sm"],
+    "fontWeight": "600",
+    "display": "flex",
+    "alignItems": "center",
+    "gap": "8px",
+    "transition": "all 0.3s ease",
+}
+
+EXIT_FULLSCREEN_BTN_STYLE = {
+    "backgroundColor": "rgba(239, 68, 68, 0.15)",
+    "color": "#fca5a5",
+    "border": "1px solid rgba(239, 68, 68, 0.3)",
+    "padding": "10px 20px",
+    "borderRadius": "10px",
+    "cursor": "pointer",
+    "fontSize": F["sm"],
+    "fontWeight": "600",
+    "display": "none",
+    "alignItems": "center",
+    "gap": "8px",
+    "transition": "all 0.3s ease",
+}
 
 app.layout = html.Div([
     # Upload page
@@ -869,7 +873,7 @@ app.layout = html.Div([
 
     # Dashboard page
     html.Div(id="dashboard-section", style={"display": "none"}, children=[
-        # Top bar
+        # Top bar with Fullscreen buttons
         html.Div([
             html.Div([
                 html.Div(style={
@@ -889,21 +893,42 @@ app.layout = html.Div([
                     })
                 ])
             ], style={"display": "flex", "alignItems": "center", "gap": "14px", "flex": "1"}),
-            html.A("← Upload New File", id="btn-back", href="/", style={
-                "backgroundColor": "rgba(255,255,255,0.08)", "color": "#e2e8f0",
-                "border": "1px solid rgba(255,255,255,0.12)", "padding": "10px 24px",
-                "borderRadius": "10px", "cursor": "pointer", "fontSize": F["sm"],
-                "fontWeight": "600", "textDecoration": "none", "display": "inline-block",
-            })
-        ], style={
+            
+            # Button container
+            html.Div([
+                # Fullscreen Button
+                html.Button([
+                    html.Span("⛶", style={"fontSize": "16px"}),
+                    html.Span("Full Screen")
+                ], id="btn-fullscreen", n_clicks=0, style=FULLSCREEN_BTN_STYLE),
+                
+                # Exit Fullscreen Button
+                html.Button([
+                    html.Span("✕", style={"fontSize": "14px", "fontWeight": "bold"}),
+                    html.Span("Exit Full Screen")
+                ], id="btn-exit-fullscreen", n_clicks=0, style=EXIT_FULLSCREEN_BTN_STYLE),
+                
+                # Back button
+                html.A("← Upload New File", id="btn-back", href="/", style={
+                    "backgroundColor": "rgba(255,255,255,0.08)", "color": "#e2e8f0",
+                    "border": "1px solid rgba(255,255,255,0.12)", "padding": "10px 24px",
+                    "borderRadius": "10px", "cursor": "pointer", "fontSize": F["sm"],
+                    "fontWeight": "600", "textDecoration": "none", "display": "inline-block",
+                    "marginLeft": "10px"
+                })
+            ], style={"display": "flex", "alignItems": "center", "gap": "8px"})
+        ], id="top-bar", style={
             "display": "flex", "justifyContent": "space-between", "alignItems": "center",
             "background": f"linear-gradient(135deg, {THEME['dark']}, {THEME['dark2']})",
             "padding": "16px 34px", "marginBottom": "24px",
-            "boxShadow": "0 4px 20px rgba(0,0,0,0.15)"
+            "boxShadow": "0 4px 20px rgba(0,0,0,0.15)",
+            "position": "sticky",
+            "top": "0",
+            "zIndex": "1000"
         }),
         html.Div(id="dashboard-body")
     ])
-], style={
+], id="main-container", style={
     "fontFamily": "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     "backgroundImage": "url('/assets/background.jpg')",
     "backgroundSize": "cover",
@@ -915,7 +940,100 @@ app.layout = html.Div([
 
 
 # ============================================================
-# Callback
+# Clientside Callback for Fullscreen - FIXED FOR SCROLL
+# ============================================================
+
+app.clientside_callback(
+    """
+    function(n_clicks_enter, n_clicks_exit) {
+        var elem = document.getElementById('main-container');
+        
+        var triggered = dash_clientside.callback_context.triggered;
+        if (!triggered || triggered.length === 0) {
+            return [window.dash_clientside.no_update, window.dash_clientside.no_update];
+        }
+        
+        var triggeredId = triggered[0].prop_id.split('.')[0];
+        
+        var enterBtn = document.getElementById('btn-fullscreen');
+        var exitBtn = document.getElementById('btn-exit-fullscreen');
+        
+        if (triggeredId === 'btn-fullscreen') {
+            // Enter fullscreen
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+            
+            // Enable scrolling in fullscreen
+            elem.style.overflow = 'auto';
+            elem.style.height = '100vh';
+            elem.style.maxHeight = '100vh';
+            
+            // Toggle button visibility
+            if (enterBtn) enterBtn.style.display = 'none';
+            if (exitBtn) exitBtn.style.display = 'flex';
+            
+        } else if (triggeredId === 'btn-exit-fullscreen') {
+            // Exit fullscreen
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+            
+            // Reset overflow
+            elem.style.overflow = '';
+            elem.style.height = '';
+            elem.style.maxHeight = '';
+            
+            // Toggle button visibility
+            if (enterBtn) enterBtn.style.display = 'flex';
+            if (exitBtn) exitBtn.style.display = 'none';
+        }
+        
+        // Listen for fullscreen change (e.g., user presses Escape)
+        document.onfullscreenchange = function() {
+            var enterBtn = document.getElementById('btn-fullscreen');
+            var exitBtn = document.getElementById('btn-exit-fullscreen');
+            var elem = document.getElementById('main-container');
+            
+            if (!document.fullscreenElement) {
+                // Exited fullscreen
+                if (enterBtn) enterBtn.style.display = 'flex';
+                if (exitBtn) exitBtn.style.display = 'none';
+                elem.style.overflow = '';
+                elem.style.height = '';
+                elem.style.maxHeight = '';
+            } else {
+                // Entered fullscreen
+                elem.style.overflow = 'auto';
+                elem.style.height = '100vh';
+                elem.style.maxHeight = '100vh';
+            }
+        };
+        
+        // Also handle webkit
+        document.onwebkitfullscreenchange = document.onfullscreenchange;
+        
+        return [window.dash_clientside.no_update, window.dash_clientside.no_update];
+    }
+    """,
+    Output("btn-fullscreen", "style"),
+    Output("btn-exit-fullscreen", "style"),
+    Input("btn-fullscreen", "n_clicks"),
+    Input("btn-exit-fullscreen", "n_clicks"),
+    prevent_initial_call=True
+)
+
+
+# ============================================================
+# Main Upload Callback
 # ============================================================
 
 @app.callback(
