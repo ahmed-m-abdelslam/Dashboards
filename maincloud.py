@@ -1662,14 +1662,14 @@ app.layout = html.Div(
                                         html.Img(
                                                     src="/assets/luxurylogo.jpg",
                                                     style={
-                                                        "height": "30px",
-                                                        "marginRight": "8px"
+                                                        "height": "100px",
+                                                        "marginRight": "15px"
                                                     }
                                                 )
                                     ],
                                 ),
                                 html.H1(
-                                    "Dashboard",
+                                    "Luxury Hospitality Dashboard",
                                     style={
                                         "margin": "0 0 8px 0",
                                         "color": THEME["text"],
@@ -1785,8 +1785,8 @@ app.layout = html.Div(
                                         html.Img(
                                                     src="/assets/luxurylogo.jpg",
                                                     style={
-                                                        "height": "30px",
-                                                        "marginRight": "8px"
+                                                        "height": "60px",
+                                                        "marginRight": "15px"
                                                     }
                                                 )
                                     ],
@@ -1794,7 +1794,7 @@ app.layout = html.Div(
                                 html.Div(
                                     [
                                         html.H1(
-                                            "Dashboard",
+                                            "Luxury Hospitality Dashboard",
                                             style={
                                                 "margin": "0",
                                                 "color": "#fff",
@@ -1804,7 +1804,7 @@ app.layout = html.Div(
                                             },
                                         ),
                                         html.P(
-                                            "Luxury Hospitality Dashboard",
+                                            "A Journey of Refined Luxury",
                                             style={
                                                 "color": "rgba(255,255,255,0.5)",
                                                 "fontSize": F["sm"],
