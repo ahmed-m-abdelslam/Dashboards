@@ -1659,13 +1659,17 @@ app.layout = html.Div(
                                         "boxShadow": "0 8px 24px rgba(99,102,241,0.35)",
                                     },
                                     children=[
-                                        html.Span(
-                                            "📊", style={"fontSize": "32px"}
-                                        )
+                                        html.Img(
+                                                    src="/assets/luxurylogo.jpg",
+                                                    style={
+                                                        "height": "30px",
+                                                        "marginRight": "8px"
+                                                    }
+                                                )
                                     ],
                                 ),
                                 html.H1(
-                                    "Procurement Dashboard",
+                                    "Dashboard",
                                     style={
                                         "margin": "0 0 8px 0",
                                         "color": THEME["text"],
@@ -1675,7 +1679,7 @@ app.layout = html.Div(
                                     },
                                 ),
                                 html.P(
-                                    "Upload procurement data file to generate insights",
+                                    "Upload data file",
                                     style={
                                         "color": THEME["text_muted"],
                                         "fontSize": F["md"],
@@ -1778,15 +1782,19 @@ app.layout = html.Div(
                                         "boxShadow": "0 4px 12px rgba(99,102,241,0.3)",
                                     },
                                     children=[
-                                        html.Span(
-                                            "📊", style={"fontSize": "18px"}
-                                        )
+                                        html.Img(
+                                                    src="/assets/luxurylogo.jpg",
+                                                    style={
+                                                        "height": "30px",
+                                                        "marginRight": "8px"
+                                                    }
+                                                )
                                     ],
                                 ),
                                 html.Div(
                                     [
                                         html.H1(
-                                            "Procurement Dashboard",
+                                            "Dashboard",
                                             style={
                                                 "margin": "0",
                                                 "color": "#fff",
@@ -1796,7 +1804,7 @@ app.layout = html.Div(
                                             },
                                         ),
                                         html.P(
-                                            "Project procurement insights and analysis",
+                                            "Luxury Hospitality Dashboard",
                                             style={
                                                 "color": "rgba(255,255,255,0.5)",
                                                 "fontSize": F["sm"],

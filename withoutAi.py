@@ -161,7 +161,7 @@ def parse_file(contents, filename):
 
     all_projects = []
     if ext == 'csv':
-        df = pd.read_csv(buf)
+        df = pd.read_csv(buf)  
         all_projects.extend(extract_projects_from_sheet(df))
     elif ext in ['xlsx', 'xlsm', 'xls']:
         engine = 'openpyxl' if ext in ['xlsx', 'xlsm'] else 'xlrd'

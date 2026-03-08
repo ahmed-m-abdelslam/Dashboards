@@ -1,17 +1,17 @@
 import os
-import pandas as pd
-import dash
-from dash import dcc, html, Input, Output, State, dash_table, clientside_callback
-import plotly.graph_objects as go
-import plotly.express as px
+import pandas as pd # type: ignore
+import dash # type: ignore
+from dash import dcc, html, Input, Output, State, dash_table, clientside_callback# type: ignore
+import plotly.graph_objects as go# type: ignore
+import plotly.express as px# type: ignore
 import io
 import base64
 import subprocess
 import platform
 from threading import Timer
 from datetime import datetime, timedelta
-from groq import Groq
-from dotenv import load_dotenv
+from groq import Groq# type: ignore
+from dotenv import load_dotenv# type: ignore
 
 load_dotenv()
 
