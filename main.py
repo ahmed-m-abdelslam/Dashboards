@@ -163,12 +163,10 @@ def extract_projects_from_sheet(df):
         else:
             data["savings_overrun"] = 0
 
-        # Budget remaining (not yet committed)
         data["budget_uncommitted"] = max(
             0, budget - data["orders_placed"] - data["orders_in_progress"]
         )
 
-        # Risk score (0-100, higher = more risk)
         risk = 0
         if data["opening_date_parsed"]:
             days_left = (data["opening_date_parsed"] - pd.Timestamp.now()).days
@@ -304,7 +302,7 @@ F = {
     "xxxl": "36px",
     "label": "11px",
     "value": "15px",
-    "section": "13px",
+    "section": "14px",
     "chart_text": "11px",
 }
 
@@ -379,20 +377,35 @@ def risk_label(score):
 
 def glass_style(extra=None):
     base = {
-        "backgroundColor": "rgba(255, 255, 255, 0.82)",
-        "backdropFilter": "blur(20px)",
-        "WebkitBackdropFilter": "blur(20px)",
-        "borderRadius": "18px",
-        "border": "1px solid rgba(255, 255, 255, 0.35)",
-        "boxShadow": "0 8px 32px rgba(0, 0, 0, 0.08)",
+        "backgroundColor": "rgba(255, 255, 255, 0.88)",
+        "backdropFilter": "blur(24px)",
+        "WebkitBackdropFilter": "blur(24px)",
+        "borderRadius": "16px",
+        "border": "1px solid rgba(255, 255, 255, 0.4)",
+        "boxShadow": "0 4px 24px rgba(0, 0, 0, 0.06)",
     }
     if extra:
         base.update(extra)
     return base
 
 
+def section_title(text):
+    return html.H2(
+        text,
+        style={
+            "fontSize": F["lg"],
+            "color": THEME["text"],
+            "fontWeight": "700",
+            "margin": "0 0 20px 0",
+            "paddingBottom": "12px",
+            "borderBottom": f"2px solid {THEME['border']}",
+            "letterSpacing": "-0.3px",
+        },
+    )
+
+
 # ============================================================
-# Portfolio Summary Header (Enhanced)
+# Portfolio Summary Header
 # ============================================================
 
 def make_portfolio_header(all_data):
@@ -400,7 +413,6 @@ def make_portfolio_header(all_data):
     active = sum(1 for d in all_data if d.get("overall_completion", 0) > 0)
     planning = n - active
 
-    # Aggregate KPIs
     total_budget = sum(d.get("effective_budget", 0) for d in all_data)
     total_ordered = sum(d.get("orders_placed", 0) for d in all_data)
     total_packages = sum(d.get("total_packages", 0) for d in all_data)
@@ -414,7 +426,7 @@ def make_portfolio_header(all_data):
     def header_kpi(label, value, icon):
         return html.Div(
             [
-                html.Span(icon, style={"fontSize": "24px"}),
+                html.Span(icon, style={"fontSize": "22px"}),
                 html.Div(
                     [
                         html.P(
@@ -424,16 +436,18 @@ def make_portfolio_header(all_data):
                                 "fontWeight": "800",
                                 "color": "#fff",
                                 "margin": "0",
+                                "lineHeight": "1.2",
                             },
                         ),
                         html.P(
                             label,
                             style={
-                                "fontSize": F["xs"],
+                                "fontSize": "10px",
                                 "color": "rgba(255,255,255,0.5)",
-                                "margin": "2px 0 0 0",
+                                "margin": "4px 0 0 0",
                                 "textTransform": "uppercase",
-                                "letterSpacing": "1px",
+                                "letterSpacing": "1.2px",
+                                "fontWeight": "600",
                             },
                         ),
                     ]
@@ -443,12 +457,12 @@ def make_portfolio_header(all_data):
                 "display": "flex",
                 "alignItems": "center",
                 "gap": "12px",
-                "backgroundColor": "rgba(255,255,255,0.07)",
-                "padding": "16px 22px",
-                "borderRadius": "14px",
+                "backgroundColor": "rgba(255,255,255,0.06)",
+                "padding": "14px 20px",
+                "borderRadius": "12px",
                 "border": "1px solid rgba(255,255,255,0.08)",
                 "flex": "1",
-                "minWidth": "180px",
+                "minWidth": "170px",
             },
         )
 
@@ -464,12 +478,11 @@ def make_portfolio_header(all_data):
                 [
                     html.Div(
                         style={
-                            "width": "10px",
-                            "height": "10px",
+                            "width": "8px",
+                            "height": "8px",
                             "borderRadius": "50%",
                             "backgroundColor": pc["main"],
                             "flexShrink": "0",
-                            "boxShadow": f"0 0 8px {hex_to_rgba(pc['main'], 0.5)}",
                         }
                     ),
                     html.Div(
@@ -487,12 +500,12 @@ def make_portfolio_header(all_data):
                                     html.Span(
                                         f"{overall:.0f}%",
                                         style={
-                                            "fontSize": F["xs"],
+                                            "fontSize": "10px",
                                             "fontWeight": "800",
                                             "color": sc,
-                                            "backgroundColor": hex_to_rgba(sc, 0.18),
+                                            "backgroundColor": hex_to_rgba(sc, 0.15),
                                             "padding": "2px 8px",
-                                            "borderRadius": "8px",
+                                            "borderRadius": "6px",
                                         },
                                     ),
                                     html.Span(
@@ -501,9 +514,9 @@ def make_portfolio_header(all_data):
                                             "fontSize": "10px",
                                             "fontWeight": "700",
                                             "color": rc,
-                                            "backgroundColor": hex_to_rgba(rc, 0.18),
+                                            "backgroundColor": hex_to_rgba(rc, 0.15),
                                             "padding": "2px 8px",
-                                            "borderRadius": "8px",
+                                            "borderRadius": "6px",
                                         },
                                     ),
                                 ],
@@ -517,19 +530,17 @@ def make_portfolio_header(all_data):
                     "display": "flex",
                     "alignItems": "center",
                     "gap": "10px",
-                    "backgroundColor": "rgba(255,255,255,0.07)",
-                    "padding": "12px 18px",
-                    "borderRadius": "12px",
-                    "border": "1px solid rgba(255,255,255,0.08)",
-                    "backdropFilter": "blur(10px)",
-                    "minWidth": "220px",
+                    "backgroundColor": "rgba(255,255,255,0.06)",
+                    "padding": "10px 16px",
+                    "borderRadius": "10px",
+                    "border": "1px solid rgba(255,255,255,0.06)",
+                    "minWidth": "200px",
                 },
             )
         )
 
     return html.Div(
         [
-            # Title row
             html.Div(
                 [
                     html.Div(
@@ -545,10 +556,10 @@ def make_portfolio_header(all_data):
                                 },
                             ),
                             html.P(
-                                f"{n} Projects  •  {active} Active  •  {planning} Planning",
+                                f"{n} Projects  ·  {active} Active  ·  {planning} Planning",
                                 style={
                                     "margin": "6px 0 0 0",
-                                    "color": "rgba(255,255,255,0.5)",
+                                    "color": "rgba(255,255,255,0.45)",
                                     "fontSize": F["sm"],
                                     "fontWeight": "500",
                                 },
@@ -559,7 +570,7 @@ def make_portfolio_header(all_data):
                         project_pills,
                         style={
                             "display": "flex",
-                            "gap": "12px",
+                            "gap": "10px",
                             "flexWrap": "wrap",
                             "flex": "1",
                             "justifyContent": "flex-end",
@@ -570,22 +581,21 @@ def make_portfolio_header(all_data):
                     "display": "flex",
                     "justifyContent": "space-between",
                     "alignItems": "center",
-                    "gap": "30px",
+                    "gap": "24px",
                     "flexWrap": "wrap",
-                    "marginBottom": "20px",
+                    "marginBottom": "18px",
                 },
             ),
-            # KPI Row
             html.Div(
                 [
                     header_kpi("Avg Completion", f"{avg_completion:.0f}%", "📈"),
                     header_kpi(
-                        "Total Packages",
+                        "Packages Done",
                         f"{int(total_pkg_done)}/{int(total_packages)}",
                         "📦",
                     ),
                     header_kpi(
-                        "Total Deliveries",
+                        "Deliveries",
                         f"{int(total_delivered)}/{int(total_pos)}",
                         "🚚",
                     ),
@@ -593,18 +603,18 @@ def make_portfolio_header(all_data):
                 ],
                 style={
                     "display": "flex",
-                    "gap": "12px",
+                    "gap": "10px",
                     "flexWrap": "wrap",
                 },
             ),
         ],
         style={
-            "background": f"linear-gradient(135deg, {THEME['dark']} 0%, {THEME['dark2']} 50%, rgba(99,102,241,0.15) 100%)",
-            "padding": "28px 36px",
-            "borderRadius": "20px",
-            "margin": "0 28px 24px 28px",
-            "boxShadow": "0 8px 40px rgba(0,0,0,0.18)",
-            "border": "1px solid rgba(255,255,255,0.05)",
+            "background": f"linear-gradient(135deg, {THEME['dark']} 0%, {THEME['dark2']} 60%, rgba(99,102,241,0.12) 100%)",
+            "padding": "26px 32px",
+            "borderRadius": "16px",
+            "margin": "0 24px 20px 24px",
+            "boxShadow": "0 4px 30px rgba(0,0,0,0.15)",
+            "border": "1px solid rgba(255,255,255,0.04)",
         },
     )
 
@@ -617,7 +627,6 @@ def make_timeline_chart(all_data):
     today = pd.Timestamp.now()
     fig = go.Figure()
 
-    has_dates = False
     for i, d in enumerate(all_data):
         pc = PROJECT_COLORS[i % len(PROJECT_COLORS)]
         name = d.get("project_name", "?")
@@ -631,7 +640,7 @@ def make_timeline_chart(all_data):
                     y=[name],
                     mode="markers+text",
                     marker=dict(
-                        size=18,
+                        size=16,
                         color=THEME["success"],
                         symbol="star",
                         line=dict(width=2, color="#fff"),
@@ -645,7 +654,6 @@ def make_timeline_chart(all_data):
                     hovertemplate=f"<b>{name}</b><br>Status: Already Opened<extra></extra>",
                 )
             )
-            has_dates = True
         elif parsed_date is not None:
             days_left = (parsed_date - today).days
 
@@ -654,7 +662,7 @@ def make_timeline_chart(all_data):
                     x=[today, parsed_date],
                     y=[name, name],
                     mode="lines",
-                    line=dict(color=pc["main"], width=8, dash=None),
+                    line=dict(color=pc["main"], width=6),
                     showlegend=False,
                     hoverinfo="skip",
                 )
@@ -666,7 +674,7 @@ def make_timeline_chart(all_data):
                     y=[name],
                     mode="markers+text",
                     marker=dict(
-                        size=16,
+                        size=14,
                         color=pc["main"],
                         symbol="diamond",
                         line=dict(width=2, color="#fff"),
@@ -687,14 +695,13 @@ def make_timeline_chart(all_data):
                     ),
                 )
             )
-            has_dates = True
         else:
             fig.add_trace(
                 go.Scatter(
                     x=[today],
                     y=[name],
                     mode="markers+text",
-                    marker=dict(size=14, color=THEME["text_muted"], symbol="circle"),
+                    marker=dict(size=12, color=THEME["text_muted"], symbol="circle"),
                     text=["TBD"],
                     textposition="middle right",
                     textfont=dict(
@@ -703,19 +710,17 @@ def make_timeline_chart(all_data):
                     showlegend=False,
                 )
             )
-            has_dates = True
 
-    # Today line
     fig.add_vline(
         x=today.timestamp() * 1000,
-        line=dict(color=THEME["danger"], width=2, dash="dot"),
+        line=dict(color=THEME["danger"], width=1.5, dash="dot"),
         annotation_text="Today",
         annotation_position="top",
     )
 
     fig.update_layout(
-        height=max(180, len(all_data) * 70 + 60),
-        margin=dict(t=40, b=40, l=20, r=40),
+        height=max(160, len(all_data) * 65 + 50),
+        margin=dict(t=35, b=35, l=20, r=40),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font={"family": "Inter", "size": 12},
@@ -758,7 +763,7 @@ def make_budget_waterfall(data, pc_idx):
             ],
             textposition="outside",
             textfont=dict(size=11, family="Inter"),
-            connector={"line": {"color": "rgba(0,0,0,0.1)", "width": 1.5}},
+            connector={"line": {"color": "rgba(0,0,0,0.08)", "width": 1}},
             increasing={"marker": {"color": pc["main"]}},
             decreasing={"marker": {"color": THEME["warning"]}},
             totals={"marker": {"color": THEME["success"] if remaining >= 0 else THEME["danger"]}},
@@ -766,8 +771,8 @@ def make_budget_waterfall(data, pc_idx):
     )
 
     fig.update_layout(
-        height=220,
-        margin=dict(t=25, b=35, l=45, r=20),
+        height=200,
+        margin=dict(t=20, b=30, l=40, r=15),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font={"family": "Inter", "size": 12},
@@ -798,41 +803,40 @@ def make_risk_section(all_data):
             marker_line=dict(width=0),
             text=[f"{r}" for r in risks],
             textposition="outside",
-            textfont=dict(size=13, family="Inter", weight=700),
+            textfont=dict(size=12, family="Inter", weight=700),
             hovertemplate="<b>%{x}</b><br>Risk Score: %{y}/100<extra></extra>",
         )
     )
 
-    # Threshold lines
     fig.add_hline(
         y=60,
-        line=dict(color=THEME["danger"], width=1.5, dash="dash"),
-        annotation_text="High Risk",
+        line=dict(color=THEME["danger"], width=1, dash="dash"),
+        annotation_text="High",
         annotation_position="top right",
         annotation_font=dict(size=10, color=THEME["danger"]),
     )
     fig.add_hline(
         y=30,
-        line=dict(color=THEME["warning"], width=1.5, dash="dash"),
-        annotation_text="Medium Risk",
+        line=dict(color=THEME["warning"], width=1, dash="dash"),
+        annotation_text="Medium",
         annotation_position="top right",
         annotation_font=dict(size=10, color=THEME["warning"]),
     )
 
     fig.update_layout(
-        height=260,
-        margin=dict(t=35, b=40, l=45, r=25),
+        height=240,
+        margin=dict(t=30, b=35, l=40, r=20),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font={"family": "Inter", "size": 12},
         yaxis=dict(
             range=[0, 110],
             gridcolor="rgba(0,0,0,0.04)",
-            tickfont={"size": 11},
+            tickfont={"size": 10},
             title="Risk Score",
             title_font=dict(size=11, color=THEME["text_light"]),
         ),
-        xaxis=dict(tickfont={"size": 12, "color": THEME["text_light"]}),
+        xaxis=dict(tickfont={"size": 11, "color": THEME["text_light"]}),
         showlegend=False,
     )
 
@@ -840,70 +844,7 @@ def make_risk_section(all_data):
 
 
 # ============================================================
-# Procurement Funnel
-# ============================================================
-
-def make_procurement_funnel(data, pc_idx):
-    pc = PROJECT_COLORS[pc_idx % len(PROJECT_COLORS)]
-    total_pkg = data.get("total_packages", 0)
-    pkg_done = data.get("packages_completed", 0)
-    pkg_wip = data.get("packages_in_progress", 0)
-    total_pos_val = data.get("total_pos", 0)
-    delivered = data.get("delivered_pos", 0)
-
-    stages = ["Total Packages", "Orders Completed", "Orders In Progress", "POs Raised", "Delivered"]
-    values = [total_pkg, pkg_done, pkg_wip, total_pos_val, delivered]
-
-    if max(values) == 0:
-        return go.Figure().update_layout(
-            height=200,
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            annotations=[
-                dict(
-                    text="No procurement data yet",
-                    xref="paper",
-                    yref="paper",
-                    x=0.5,
-                    y=0.5,
-                    showarrow=False,
-                    font=dict(size=14, color=THEME["text_muted"]),
-                )
-            ],
-        )
-
-    color_scale = [
-        hex_to_rgba(pc["main"], 0.3),
-        hex_to_rgba(pc["main"], 0.5),
-        hex_to_rgba(pc["main"], 0.65),
-        hex_to_rgba(pc["main"], 0.8),
-        pc["main"],
-    ]
-
-    fig = go.Figure(
-        go.Funnel(
-            y=stages,
-            x=values,
-            textinfo="value+percent initial",
-            textfont=dict(size=12, family="Inter"),
-            marker=dict(color=color_scale, line=dict(width=0)),
-            connector=dict(line=dict(color="rgba(0,0,0,0.05)", width=1)),
-        )
-    )
-
-    fig.update_layout(
-        height=220,
-        margin=dict(t=15, b=10, l=10, r=10),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font={"family": "Inter"},
-    )
-
-    return fig
-
-
-# ============================================================
-# Unified Comparison Section (Enhanced)
+# Unified Comparison Section
 # ============================================================
 
 def make_unified_comparison(all_data):
@@ -938,16 +879,16 @@ def make_unified_comparison(all_data):
         )
     budget_fig.update_layout(
         barmode="group",
-        height=300,
-        margin=dict(t=35, b=45, l=55, r=25),
+        height=280,
+        margin=dict(t=30, b=40, l=50, r=20),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font={"family": "Inter", "size": 12},
         legend=dict(
-            orientation="h", y=1.12, x=0.5, xanchor="center", font={"size": 11}
+            orientation="h", y=1.1, x=0.5, xanchor="center", font={"size": 11}
         ),
-        yaxis=dict(gridcolor="rgba(0,0,0,0.04)", tickfont={"size": 11}),
-        xaxis=dict(tickfont={"size": 12, "color": THEME["text_light"]}),
+        yaxis=dict(gridcolor="rgba(0,0,0,0.04)", tickfont={"size": 10}),
+        xaxis=dict(tickfont={"size": 11, "color": THEME["text_light"]}),
     )
 
     # Radar chart
@@ -968,9 +909,9 @@ def make_unified_comparison(all_data):
                 theta=cats_closed,
                 name=names[i],
                 fill="toself",
-                fillcolor=hex_to_rgba(colors[i], 0.15),
+                fillcolor=hex_to_rgba(colors[i], 0.12),
                 line=dict(color=colors[i], width=2.5),
-                marker=dict(size=6, color=colors[i]),
+                marker=dict(size=5, color=colors[i]),
             )
         )
     radar_fig.update_layout(
@@ -981,13 +922,13 @@ def make_unified_comparison(all_data):
                 tickfont={"size": 10},
                 gridcolor="rgba(0,0,0,0.06)",
             ),
-            angularaxis=dict(tickfont={"size": 12, "color": THEME["text_light"]}),
+            angularaxis=dict(tickfont={"size": 11, "color": THEME["text_light"]}),
         ),
-        height=320,
-        margin=dict(t=45, b=25, l=65, r=65),
+        height=300,
+        margin=dict(t=40, b=20, l=60, r=60),
         paper_bgcolor="rgba(0,0,0,0)",
         legend=dict(
-            orientation="h", y=-0.08, x=0.5, xanchor="center", font={"size": 12}
+            orientation="h", y=-0.08, x=0.5, xanchor="center", font={"size": 11}
         ),
         font={"family": "Inter"},
     )
@@ -1066,59 +1007,44 @@ def make_unified_comparison(all_data):
 
     pkg_del_fig.update_layout(
         barmode="stack",
-        height=300,
-        margin=dict(t=35, b=55, l=45, r=25),
+        height=280,
+        margin=dict(t=30, b=50, l=40, r=20),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font={"family": "Inter", "size": 12},
         legend=dict(
-            orientation="h", y=1.15, x=0.5, xanchor="center", font={"size": 11}
+            orientation="h", y=1.12, x=0.5, xanchor="center", font={"size": 11}
         ),
-        yaxis=dict(gridcolor="rgba(0,0,0,0.04)", tickfont={"size": 11}),
+        yaxis=dict(gridcolor="rgba(0,0,0,0.04)", tickfont={"size": 10}),
         xaxis=dict(tickfont={"size": 11, "color": THEME["text_light"]}),
     )
 
-    # Timeline
     timeline_fig = make_timeline_chart(all_data)
-
-    # Risk
     risk_fig = make_risk_section(all_data)
 
     def chart_card(title, fig, min_w="380px"):
         return html.Div(
             [
-                html.P(
+                html.H3(
                     title,
                     style={
-                        "fontSize": F["section"],
-                        "color": THEME["text_light"],
+                        "fontSize": F["md"],
+                        "color": THEME["text"],
                         "fontWeight": "700",
-                        "letterSpacing": "1.5px",
-                        "margin": "0 0 6px 0",
-                        "textTransform": "uppercase",
+                        "margin": "0 0 8px 0",
                     },
                 ),
                 dcc.Graph(figure=fig, config={"displayModeBar": False}),
             ],
             style=glass_style(
-                {"padding": "22px 24px", "flex": "1", "minWidth": min_w}
+                {"padding": "20px 22px", "flex": "1", "minWidth": min_w}
             ),
         )
 
     return html.Div(
         [
-            html.P(
-                "Cross-Project Comparison",
-                style={
-                    "fontSize": F["section"],
-                    "color": THEME["text_light"],
-                    "letterSpacing": "2.5px",
-                    "fontWeight": "700",
-                    "margin": "0 0 18px 0",
-                    "textAlign": "center",
-                    "textTransform": "uppercase",
-                },
-            ),
+            section_title("Cross-Project Comparison"),
+            # Row 1: Budget + Radar
             html.Div(
                 [
                     chart_card("Budget Allocation", budget_fig),
@@ -1126,31 +1052,33 @@ def make_unified_comparison(all_data):
                 ],
                 style={
                     "display": "flex",
-                    "gap": "18px",
+                    "gap": "16px",
                     "flexWrap": "wrap",
-                    "marginBottom": "18px",
+                    "marginBottom": "16px",
                 },
             ),
+            # Row 2: Packages
             html.Div(
                 [
-                    chart_card("Packages & Deliveries Breakdown", pkg_del_fig),
+                    chart_card("Packages & Deliveries", pkg_del_fig),
                 ],
-                style={"display": "flex", "gap": "18px", "marginBottom": "18px"},
+                style={"display": "flex", "gap": "16px", "marginBottom": "16px"},
             ),
+            # Row 3: Timeline + Risk
             html.Div(
                 [
-                    chart_card("Opening Timeline", timeline_fig, "350px"),
-                    chart_card("Risk Assessment", risk_fig, "350px"),
+                    chart_card("Opening Timeline", timeline_fig, "340px"),
+                    chart_card("Risk Assessment", risk_fig, "340px"),
                 ],
-                style={"display": "flex", "gap": "18px", "flexWrap": "wrap"},
+                style={"display": "flex", "gap": "16px", "flexWrap": "wrap"},
             ),
         ],
-        style={"padding": "0 28px 24px 28px"},
+        style={"padding": "0 24px 20px 24px"},
     )
 
 
 # ============================================================
-# Summary Table (Enhanced)
+# Summary Table
 # ============================================================
 
 def make_data_table(all_data):
@@ -1178,11 +1106,10 @@ def make_data_table(all_data):
     df_table = pd.DataFrame(rows)
 
     style_data_conditional = [
-        {"if": {"row_index": "odd"}, "backgroundColor": "rgba(248,250,252,0.7)"},
-        {"if": {"row_index": "even"}, "backgroundColor": "rgba(255,255,255,0.7)"},
+        {"if": {"row_index": "odd"}, "backgroundColor": "rgba(248,250,252,0.8)"},
+        {"if": {"row_index": "even"}, "backgroundColor": "rgba(255,255,255,0.9)"},
     ]
 
-    # Color the Risk column
     for i, d in enumerate(all_data):
         rc = risk_color(d.get("risk_score", 0))
         style_data_conditional.append(
@@ -1192,7 +1119,6 @@ def make_data_table(all_data):
                 "fontWeight": "700",
             }
         )
-        # Color savings
         sav = d.get("savings_overrun", 0)
         style_data_conditional.append(
             {
@@ -1204,37 +1130,26 @@ def make_data_table(all_data):
 
     return html.Div(
         [
-            html.P(
-                "Project Summary",
-                style={
-                    "fontSize": F["section"],
-                    "color": THEME["text_light"],
-                    "letterSpacing": "2.5px",
-                    "fontWeight": "700",
-                    "margin": "0 0 14px 0",
-                    "textAlign": "center",
-                    "textTransform": "uppercase",
-                },
-            ),
+            section_title("Project Summary Table"),
             html.Div(
                 [
                     dash_table.DataTable(
                         data=df_table.to_dict("records"),
                         columns=[{"name": c, "id": c} for c in df_table.columns],
-                        style_table={"overflowX": "auto", "borderRadius": "14px"},
+                        style_table={"overflowX": "auto", "borderRadius": "12px"},
                         style_header={
                             "backgroundColor": THEME["dark"],
                             "color": "#fff",
                             "fontWeight": "700",
                             "fontSize": F["sm"],
                             "textAlign": "center",
-                            "padding": "14px 12px",
+                            "padding": "12px 10px",
                             "fontFamily": "Inter",
                             "borderBottom": "none",
                         },
                         style_cell={
                             "textAlign": "center",
-                            "padding": "12px 14px",
+                            "padding": "11px 12px",
                             "fontSize": F["sm"],
                             "fontFamily": "Inter",
                             "border": "none",
@@ -1248,12 +1163,74 @@ def make_data_table(all_data):
                 style=glass_style({"overflow": "hidden", "padding": "0"}),
             ),
         ],
-        style={"padding": "0 28px 28px 28px"},
+        style={"padding": "0 24px 24px 24px"},
     )
 
 
 # ============================================================
-# Project Card (Enhanced)
+# Progress Bar Component
+# ============================================================
+
+def make_progress_bar(label, value, max_val, color, show_fraction=True):
+    pct = (value / max_val * 100) if max_val > 0 else 0
+    pct = min(100, pct)
+
+    right_text = f"{int(value)}/{int(max_val)}" if show_fraction else f"{pct:.0f}%"
+
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Span(
+                        label,
+                        style={
+                            "fontSize": F["sm"],
+                            "color": THEME["text"],
+                            "fontWeight": "600",
+                        },
+                    ),
+                    html.Span(
+                        right_text,
+                        style={
+                            "fontSize": F["sm"],
+                            "color": THEME["text_light"],
+                            "fontWeight": "700",
+                        },
+                    ),
+                ],
+                style={
+                    "display": "flex",
+                    "justifyContent": "space-between",
+                    "marginBottom": "6px",
+                },
+            ),
+            html.Div(
+                [
+                    html.Div(
+                        style={
+                            "width": f"{pct}%",
+                            "height": "100%",
+                            "backgroundColor": color,
+                            "borderRadius": "6px",
+                            "transition": "width 0.6s ease",
+                        }
+                    )
+                ],
+                style={
+                    "width": "100%",
+                    "height": "8px",
+                    "backgroundColor": "#f1f5f9",
+                    "borderRadius": "6px",
+                    "overflow": "hidden",
+                },
+            ),
+        ],
+        style={"marginBottom": "14px"},
+    )
+
+
+# ============================================================
+# Project Card (Enhanced - No Funnel)
 # ============================================================
 
 def make_project_card(data, pc_idx):
@@ -1294,58 +1271,58 @@ def make_project_card(data, pc_idx):
     oc = status_color(overall)
     rc = risk_color(risk_score)
 
-    # Overall gauge
+    # Overall gauge - cleaner
     gauge = go.Figure(
         go.Indicator(
             mode="gauge+number",
             value=round(overall, 1),
             number={
                 "suffix": "%",
-                "font": {"size": 36, "color": pc["main"], "family": "Inter"},
+                "font": {"size": 32, "color": pc["main"], "family": "Inter"},
             },
             gauge={
-                "axis": {"range": [0, 100], "tickfont": {"size": 10}},
+                "axis": {"range": [0, 100], "tickfont": {"size": 9}, "dtick": 25},
                 "bar": {"color": oc, "thickness": 0.7},
                 "bgcolor": "#f1f5f9",
                 "borderwidth": 0,
                 "steps": [
-                    {"range": [0, 40], "color": hex_to_rgba(THEME["danger"], 0.08)},
-                    {"range": [40, 75], "color": hex_to_rgba(THEME["warning"], 0.08)},
-                    {"range": [75, 100], "color": hex_to_rgba(THEME["success"], 0.08)},
+                    {"range": [0, 40], "color": hex_to_rgba(THEME["danger"], 0.06)},
+                    {"range": [40, 75], "color": hex_to_rgba(THEME["warning"], 0.06)},
+                    {"range": [75, 100], "color": hex_to_rgba(THEME["success"], 0.06)},
                 ],
             },
         )
     )
     gauge.update_layout(
-        height=160,
-        margin=dict(t=15, b=0, l=20, r=20),
+        height=140,
+        margin=dict(t=10, b=0, l=15, r=15),
         paper_bgcolor="rgba(0,0,0,0)",
     )
 
     # Budget waterfall
     waterfall_fig = make_budget_waterfall(data, pc_idx)
 
-    # Procurement funnel
-    funnel_fig = make_procurement_funnel(data, pc_idx)
-
+    # KPI chips
     def kpi_chip(label, value, icon, color):
         return html.Div(
             [
-                html.Span(icon, style={"fontSize": "18px"}),
+                html.Span(icon, style={"fontSize": "16px"}),
                 html.Div(
                     [
                         html.P(
                             label,
                             style={
-                                "fontSize": F["xs"],
+                                "fontSize": "10px",
                                 "color": THEME["text_muted"],
                                 "margin": "0",
+                                "textTransform": "uppercase",
+                                "letterSpacing": "0.5px",
                             },
                         ),
                         html.P(
                             value,
                             style={
-                                "fontSize": F["value"],
+                                "fontSize": F["md"],
                                 "color": THEME["text"],
                                 "margin": "2px 0 0 0",
                                 "fontWeight": "700",
@@ -1358,11 +1335,11 @@ def make_project_card(data, pc_idx):
                 "display": "flex",
                 "alignItems": "center",
                 "gap": "8px",
-                "backgroundColor": hex_to_rgba(color, 0.06),
+                "backgroundColor": hex_to_rgba(color, 0.05),
                 "padding": "10px 12px",
-                "borderRadius": "12px",
+                "borderRadius": "10px",
                 "flex": "1",
-                "minWidth": "130px",
+                "minWidth": "120px",
             },
         )
 
@@ -1372,9 +1349,7 @@ def make_project_card(data, pc_idx):
     kpi_row = html.Div(
         [
             kpi_chip("Budget", fmt_num(budget, currency), "💰", pc["main"]),
-            kpi_chip(sav_label, fmt_num(abs(savings), currency), "📈" if savings >= 0 else "📉", sav_color),
-            kpi_chip("Packages", f"{int(pkg_done)}/{int(pkgs)}", "📦", THEME["info"]),
-            kpi_chip("Deliveries", f"{int(del_done)}/{int(pos)}", "🚚", THEME["success"]),
+            kpi_chip(sav_label, fmt_num(abs(savings), currency), "📊", sav_color),
         ],
         style={
             "display": "flex",
@@ -1384,7 +1359,7 @@ def make_project_card(data, pc_idx):
         },
     )
 
-    # Proc / Delivery status badges
+    # Status badges
     proc_started = data.get("proc_started", "").lower() == "yes"
     delivery_started = data.get("delivery_started", "").lower() == "yes"
 
@@ -1393,24 +1368,23 @@ def make_project_card(data, pc_idx):
         return html.Span(
             f"{'✓' if active else '○'} {label}",
             style={
-                "fontSize": F["xs"],
+                "fontSize": "10px",
                 "fontWeight": "700",
                 "color": color,
-                "backgroundColor": hex_to_rgba(color, 0.1),
+                "backgroundColor": hex_to_rgba(color, 0.08),
                 "padding": "4px 10px",
                 "borderRadius": "20px",
-                "border": f"1px solid {hex_to_rgba(color, 0.25)}",
             },
         )
 
     status_row = html.Div(
         [
-            status_badge("Procurement Started", proc_started),
-            status_badge("Delivery Started", delivery_started),
+            status_badge("Procurement", proc_started),
+            status_badge("Delivery", delivery_started),
             html.Span(
-                f"Opening: {opening}",
+                f"📅 {opening}",
                 style={
-                    "fontSize": F["xs"],
+                    "fontSize": "10px",
                     "fontWeight": "600",
                     "color": THEME["info"],
                     "backgroundColor": hex_to_rgba(THEME["info"], 0.08),
@@ -1421,20 +1395,43 @@ def make_project_card(data, pc_idx):
             html.Span(
                 risk_label(risk_score),
                 style={
-                    "fontSize": F["xs"],
+                    "fontSize": "10px",
                     "fontWeight": "700",
                     "color": rc,
-                    "backgroundColor": hex_to_rgba(rc, 0.12),
+                    "backgroundColor": hex_to_rgba(rc, 0.1),
                     "padding": "4px 10px",
                     "borderRadius": "20px",
-                    "border": f"1px solid {hex_to_rgba(rc, 0.3)}",
                 },
             ),
         ],
         style={
             "display": "flex",
-            "gap": "8px",
+            "gap": "6px",
             "flexWrap": "wrap",
+            "marginBottom": "16px",
+        },
+    )
+
+    # Progress bars for packages and deliveries
+    progress_section = html.Div(
+        [
+            html.H4(
+                "Progress Tracking",
+                style={
+                    "fontSize": F["sm"],
+                    "color": THEME["text"],
+                    "fontWeight": "700",
+                    "margin": "0 0 12px 0",
+                },
+            ),
+            make_progress_bar("Packages Completed", pkg_done, pkgs, THEME["success"]),
+            make_progress_bar("Packages In Progress", pkg_wip, pkgs, THEME["warning"]),
+            make_progress_bar("POs Delivered", del_done, pos, THEME["info"]),
+        ],
+        style={
+            "backgroundColor": "#fafbfc",
+            "padding": "16px",
+            "borderRadius": "12px",
             "marginBottom": "16px",
         },
     )
@@ -1448,7 +1445,7 @@ def make_project_card(data, pc_idx):
                     style={
                         "padding": "10px 14px",
                         "backgroundColor": "#fffbeb",
-                        "borderRadius": "10px",
+                        "borderRadius": "8px",
                         "fontSize": F["sm"],
                         "borderLeft": f"3px solid {THEME['warning']}",
                         "marginBottom": "6px",
@@ -1467,8 +1464,8 @@ def make_project_card(data, pc_idx):
                 "fontSize": F["sm"],
                 "margin": "0",
                 "padding": "10px 14px",
-                "backgroundColor": hex_to_rgba(THEME["success"], 0.06),
-                "borderRadius": "10px",
+                "backgroundColor": hex_to_rgba(THEME["success"], 0.05),
+                "borderRadius": "8px",
                 "borderLeft": f"3px solid {THEME['success']}",
             },
         )
@@ -1476,14 +1473,13 @@ def make_project_card(data, pc_idx):
     # AI block
     ai_block = html.Div(
         [
-            html.P(
-                "AI PROJECT SUMMARY",
+            html.H4(
+                "AI Summary",
                 style={
-                    "fontSize": F["xs"],
-                    "color": THEME["text_muted"],
-                    "letterSpacing": "1.5px",
+                    "fontSize": F["sm"],
+                    "color": THEME["text"],
                     "fontWeight": "700",
-                    "margin": "16px 0 10px 0",
+                    "margin": "16px 0 8px 0",
                 },
             ),
             html.Div(
@@ -1491,7 +1487,7 @@ def make_project_card(data, pc_idx):
                 style={
                     "backgroundColor": "#eef2ff",
                     "padding": "12px 14px",
-                    "borderRadius": "10px",
+                    "borderRadius": "8px",
                     "fontSize": F["sm"],
                     "color": "#3730a3",
                     "borderLeft": "3px solid #6366f1",
@@ -1501,16 +1497,14 @@ def make_project_card(data, pc_idx):
         ]
     )
 
-    def section_label(text):
-        return html.P(
+    def card_section_label(text):
+        return html.H4(
             text,
             style={
-                "fontSize": F["xs"],
-                "color": THEME["text_muted"],
-                "letterSpacing": "1.5px",
+                "fontSize": F["sm"],
+                "color": THEME["text"],
                 "fontWeight": "700",
                 "margin": "16px 0 8px 0",
-                "textTransform": "uppercase",
             },
         )
 
@@ -1531,13 +1525,14 @@ def make_project_card(data, pc_idx):
                     html.Span(
                         stage,
                         style={
-                            "backgroundColor": stage_bg,
-                            "padding": "4px 12px",
+                            "backgroundColor": "rgba(255,255,255,0.2)",
+                            "padding": "4px 14px",
                             "borderRadius": "20px",
                             "fontSize": F["xs"],
                             "color": "#fff",
                             "fontWeight": "600",
                             "whiteSpace": "nowrap",
+                            "backdropFilter": "blur(4px)",
                         },
                     ),
                 ],
@@ -1547,7 +1542,7 @@ def make_project_card(data, pc_idx):
                     "alignItems": "center",
                     "background": pc["gradient"],
                     "padding": "18px 22px",
-                    "borderRadius": "18px 18px 0 0",
+                    "borderRadius": "16px 16px 0 0",
                     "gap": "12px",
                     "flexWrap": "wrap",
                 },
@@ -1558,23 +1553,37 @@ def make_project_card(data, pc_idx):
                     status_row,
                     kpi_row,
                     # Overall completion gauge
-                    section_label("Overall Procurement Completion"),
-                    dcc.Graph(figure=gauge, config={"displayModeBar": False}),
+                    card_section_label("Overall Completion"),
+                    html.Div(
+                        dcc.Graph(figure=gauge, config={"displayModeBar": False}),
+                        style={
+                            "backgroundColor": "#fafbfc",
+                            "borderRadius": "12px",
+                            "padding": "8px 0",
+                            "marginBottom": "16px",
+                        },
+                    ),
+                    # Progress bars
+                    progress_section,
                     # Budget waterfall
-                    section_label("Budget Breakdown"),
-                    dcc.Graph(figure=waterfall_fig, config={"displayModeBar": False}),
-                    # Procurement funnel
-                    section_label("Procurement Funnel"),
-                    dcc.Graph(figure=funnel_fig, config={"displayModeBar": False}),
+                    card_section_label("Budget Breakdown"),
+                    html.Div(
+                        dcc.Graph(figure=waterfall_fig, config={"displayModeBar": False}),
+                        style={
+                            "backgroundColor": "#fafbfc",
+                            "borderRadius": "12px",
+                            "padding": "4px 0",
+                            "marginBottom": "16px",
+                        },
+                    ),
                     # Concerns
-                    section_label("Concerns & Notes"),
+                    card_section_label("Concerns & Notes"),
                     cblock,
                     # AI Summary
                     ai_block,
                 ],
                 style={
-                    "padding": "20px 24px",
-                    "backgroundColor": hex_to_rgba(pc["main"], 0.03),
+                    "padding": "20px 22px",
                 },
             ),
         ],
@@ -1582,8 +1591,8 @@ def make_project_card(data, pc_idx):
             {
                 "overflow": "hidden",
                 "flex": "1",
-                "minWidth": "440px",
-                "maxWidth": "600px",
+                "minWidth": "420px",
+                "maxWidth": "580px",
             }
         ),
     )
@@ -1600,10 +1609,6 @@ app = dash.Dash(
     ],
     suppress_callback_exceptions=True,
 )
-
-# ============================================================
-# Fullscreen Button Styles
-# ============================================================
 
 FULLSCREEN_BTN_STYLE = {
     "backgroundColor": "rgba(99, 102, 241, 0.15)",
@@ -1657,15 +1662,17 @@ app.layout = html.Div(
                                         "justifyContent": "center",
                                         "margin": "0 auto 20px auto",
                                         "boxShadow": "0 8px 24px rgba(99,102,241,0.35)",
+                                        "overflow": "hidden",
                                     },
                                     children=[
                                         html.Img(
-                                                    src="/assets/luxurylogo.jpg",
-                                                    style={
-                                                        "height": "100px",
-                                                        "marginRight": "15px"
-                                                    }
-                                                )
+                                            src="/assets/luxurylogo.jpg",
+                                            style={
+                                                "height": "72px",
+                                                "width": "72px",
+                                                "objectFit": "cover",
+                                            }
+                                        )
                                     ],
                                 ),
                                 html.H1(
@@ -1673,17 +1680,17 @@ app.layout = html.Div(
                                     style={
                                         "margin": "0 0 8px 0",
                                         "color": THEME["text"],
-                                        "fontSize": "32px",
+                                        "fontSize": "30px",
                                         "fontWeight": "800",
                                         "letterSpacing": "-0.5px",
                                     },
                                 ),
                                 html.P(
-                                    "Upload data file",
+                                    "Upload your data file to get started",
                                     style={
                                         "color": THEME["text_muted"],
                                         "fontSize": F["md"],
-                                        "margin": "0 0 36px 0",
+                                        "margin": "0 0 32px 0",
                                         "fontWeight": "400",
                                     },
                                 ),
@@ -1697,8 +1704,8 @@ app.layout = html.Div(
                                         [
                                             html.Div(
                                                 style={
-                                                    "width": "56px",
-                                                    "height": "56px",
+                                                    "width": "52px",
+                                                    "height": "52px",
                                                     "borderRadius": "14px",
                                                     "backgroundColor": "#eef2ff",
                                                     "display": "flex",
@@ -1709,7 +1716,7 @@ app.layout = html.Div(
                                                 children=[
                                                     html.Span(
                                                         "📁",
-                                                        style={"fontSize": "26px"},
+                                                        style={"fontSize": "24px"},
                                                     )
                                                 ],
                                             ),
@@ -1723,7 +1730,7 @@ app.layout = html.Div(
                                                 },
                                             ),
                                             html.P(
-                                                ".xlsx  •  .xlsm  •  .xls  •  .csv",
+                                                ".xlsx  ·  .xlsm  ·  .xls  ·  .csv",
                                                 style={
                                                     "color": THEME["text_muted"],
                                                     "fontSize": F["sm"],
@@ -1736,23 +1743,24 @@ app.layout = html.Div(
                             ),
                             style={
                                 "width": "100%",
-                                "padding": "45px 20px",
+                                "padding": "40px 20px",
                                 "borderWidth": "2px",
                                 "borderStyle": "dashed",
                                 "borderColor": "#c7d2fe",
-                                "borderRadius": "16px",
+                                "borderRadius": "14px",
                                 "textAlign": "center",
                                 "backgroundColor": "rgba(250,251,255,0.8)",
                                 "cursor": "pointer",
+                                "transition": "all 0.3s ease",
                             },
                             multiple=False,
                         ),
-                        html.Div(id="upload-error", style={"marginTop": "18px"}),
+                        html.Div(id="upload-error", style={"marginTop": "16px"}),
                     ],
                     style=glass_style(
                         {
-                            "padding": "52px 60px",
-                            "maxWidth": "520px",
+                            "padding": "48px 56px",
+                            "maxWidth": "500px",
                             "margin": "0 auto",
                             "textAlign": "center",
                         }
@@ -1772,23 +1780,24 @@ app.layout = html.Div(
                             [
                                 html.Div(
                                     style={
-                                        "width": "42px",
-                                        "height": "42px",
-                                        "borderRadius": "12px",
+                                        "width": "40px",
+                                        "height": "40px",
+                                        "borderRadius": "10px",
                                         "background": "linear-gradient(135deg, #6366f1, #8b5cf6)",
                                         "display": "flex",
                                         "alignItems": "center",
                                         "justifyContent": "center",
-                                        "boxShadow": "0 4px 12px rgba(99,102,241,0.3)",
+                                        "overflow": "hidden",
                                     },
                                     children=[
                                         html.Img(
-                                                    src="/assets/luxurylogo.jpg",
-                                                    style={
-                                                        "height": "60px",
-                                                        "marginRight": "15px"
-                                                    }
-                                                )
+                                            src="/assets/luxurylogo.jpg",
+                                            style={
+                                                "height": "40px",
+                                                "width": "40px",
+                                                "objectFit": "cover",
+                                            }
+                                        )
                                     ],
                                 ),
                                 html.Div(
@@ -1798,7 +1807,7 @@ app.layout = html.Div(
                                             style={
                                                 "margin": "0",
                                                 "color": "#fff",
-                                                "fontSize": F["xl"],
+                                                "fontSize": F["lg"],
                                                 "fontWeight": "800",
                                                 "letterSpacing": "-0.3px",
                                             },
@@ -1806,9 +1815,9 @@ app.layout = html.Div(
                                         html.P(
                                             "A Journey of Refined Luxury",
                                             style={
-                                                "color": "rgba(255,255,255,0.5)",
-                                                "fontSize": F["sm"],
-                                                "margin": "0",
+                                                "color": "rgba(255,255,255,0.45)",
+                                                "fontSize": F["xs"],
+                                                "margin": "2px 0 0 0",
                                                 "fontWeight": "500",
                                             },
                                         ),
@@ -1818,18 +1827,15 @@ app.layout = html.Div(
                             style={
                                 "display": "flex",
                                 "alignItems": "center",
-                                "gap": "14px",
+                                "gap": "12px",
                                 "flex": "1",
                             },
                         ),
-                        # Button container
                         html.Div(
                             [
                                 html.Button(
                                     [
-                                        html.Span(
-                                            "⛶", style={"fontSize": "16px"}
-                                        ),
+                                        html.Span("⛶", style={"fontSize": "14px"}),
                                         html.Span("Full Screen"),
                                     ],
                                     id="btn-fullscreen",
@@ -1838,13 +1844,7 @@ app.layout = html.Div(
                                 ),
                                 html.Button(
                                     [
-                                        html.Span(
-                                            "✕",
-                                            style={
-                                                "fontSize": "14px",
-                                                "fontWeight": "bold",
-                                            },
-                                        ),
+                                        html.Span("✕", style={"fontSize": "12px", "fontWeight": "bold"}),
                                         html.Span("Exit Full Screen"),
                                     ],
                                     id="btn-exit-fullscreen",
@@ -1852,21 +1852,20 @@ app.layout = html.Div(
                                     style=EXIT_FULLSCREEN_BTN_STYLE,
                                 ),
                                 html.A(
-                                    "← Upload New File",
+                                    "← New File",
                                     id="btn-back",
                                     href="/",
                                     style={
                                         "backgroundColor": "rgba(255,255,255,0.08)",
                                         "color": "#e2e8f0",
-                                        "border": "1px solid rgba(255,255,255,0.12)",
-                                        "padding": "10px 24px",
+                                        "border": "1px solid rgba(255,255,255,0.1)",
+                                        "padding": "10px 20px",
                                         "borderRadius": "10px",
                                         "cursor": "pointer",
                                         "fontSize": F["sm"],
                                         "fontWeight": "600",
                                         "textDecoration": "none",
                                         "display": "inline-block",
-                                        "marginLeft": "10px",
                                     },
                                 ),
                             ],
@@ -1883,9 +1882,9 @@ app.layout = html.Div(
                         "justifyContent": "space-between",
                         "alignItems": "center",
                         "background": f"linear-gradient(135deg, {THEME['dark']}, {THEME['dark2']})",
-                        "padding": "16px 34px",
-                        "marginBottom": "24px",
-                        "boxShadow": "0 4px 20px rgba(0,0,0,0.15)",
+                        "padding": "14px 28px",
+                        "marginBottom": "20px",
+                        "boxShadow": "0 2px 16px rgba(0,0,0,0.12)",
                         "position": "sticky",
                         "top": "0",
                         "zIndex": "1000",
@@ -2057,20 +2056,17 @@ def handle_upload(contents, filename):
     body = html.Div(
         [
             header,
+            # Spacer
+            html.Div(style={"height": "4px"}),
             comparison,
             table,
-            html.Div(style={"height": "12px"}),
-            html.P(
-                "Project Details",
-                style={
-                    "fontSize": F["section"],
-                    "color": THEME["text_light"],
-                    "letterSpacing": "2.5px",
-                    "fontWeight": "700",
-                    "margin": "0 0 16px 0",
-                    "textAlign": "center",
-                    "textTransform": "uppercase",
-                },
+            html.Div(style={"height": "8px"}),
+            # Project Details Section
+            html.Div(
+                [
+                    section_title("Project Details"),
+                ],
+                style={"padding": "0 24px"},
             ),
             html.Div(
                 cards,
@@ -2078,9 +2074,9 @@ def handle_upload(contents, filename):
                     "display": "flex",
                     "justifyContent": "center",
                     "alignItems": "flex-start",
-                    "gap": "24px",
+                    "gap": "20px",
                     "flexWrap": "wrap",
-                    "padding": "0 28px 48px 28px",
+                    "padding": "0 24px 40px 24px",
                 },
             ),
         ]
